@@ -1,5 +1,6 @@
 # IntelliJ settings
 .idea
+*__pycache__
 
 # Local .terraform directories
 **/.terraform/*

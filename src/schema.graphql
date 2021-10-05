@@ -1,0 +1,13 @@
+type RelatedContentItem {
+    title: String
+    url: String!
+}
+
+type RelatedContentItemsResult {
+    message: String
+    relatedItems: [RelatedContentItem]
+}
+
+type Query {
+    getRelatedContentFor(url: String!): RelatedContentItemsResult
+}
