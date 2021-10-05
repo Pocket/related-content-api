@@ -19,7 +19,6 @@ def graphql_playground():
 
 @app.route("/graphql", methods=["POST"])
 def graphql_server():
-    print("WE GOT TO THE GQL FUNCTION")
     data = request.get_json()
     success, result = graphql_sync(
         schema,
