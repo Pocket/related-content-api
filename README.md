@@ -13,8 +13,10 @@ that points to name changes to your new service name, please address them before
 
 ## Develop Locally
 ```bash
-npm install
-npm start:dev
+source related-content-api/bin/activate
+pip3 install requirements.txt
+cd src
+flask run
 ```
 
 ## Start docker
