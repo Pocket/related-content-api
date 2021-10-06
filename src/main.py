@@ -1,9 +1,9 @@
-from api import app
+from components import app
 from ariadne import load_schema_from_path, make_executable_schema, \
     graphql_sync, ObjectType
 from ariadne.constants import PLAYGROUND_HTML
 from flask import request, jsonify
-from api.resolvers import getRelatedContent_resolver
+from components.get_related_content_resolver import getRelatedContent_resolver
 
 query = ObjectType("Query")
 query.set_field("getRelatedContentFor", getRelatedContent_resolver)
