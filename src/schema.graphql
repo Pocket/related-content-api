@@ -9,5 +9,5 @@ type RelatedContentItemsResult {
 }
 
 type Query {
-    getRelatedContentFor(url: String!): RelatedContentItemsResult
+    getSyndicatedRelatedContentFor(syndicated_article_api: String!): RelatedContentItemsResult
 }
