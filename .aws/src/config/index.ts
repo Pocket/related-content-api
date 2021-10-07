@@ -1,5 +1,5 @@
-const name = 'Acme'; //todo: change the service name, match shared infrastructure name
-const domainPrefix = 'acme';
+const name = 'RelatedContentAPI'; //todo: change the service name, match shared infrastructure name
+const domainPrefix = 'relatedcontent';
 const isDev = process.env.NODE_ENV === 'development';
 const environment = isDev ? 'Dev' : 'Prod';
 const domain = isDev
@@ -20,7 +20,7 @@ export const config = {
   isDev,
   prefix: `${name}-${environment}`,
   circleCIPrefix: `/${name}/CircleCI/${environment}`,
-  shortName: 'ACME', //change to your service name, limit to 6 characters, match shared-infrastructure short name
+  shortName: 'RELCNT', //change to your service name, limit to 6 characters, match shared-infrastructure short name
   environment,
   domain,
   codePipeline: {

@@ -8,3 +8,8 @@ def getRelatedContent_resolver(obj, info, url):
         ]
     }
     return payload
+
+## TODO next questions:
+ - integrate with the existing doc vector prototype or wait and switch to researching this?
+ - get this behind client api with changes to shared-infrastructure and .circle ci
+
