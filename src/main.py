@@ -3,10 +3,10 @@ from ariadne import load_schema_from_path, make_executable_schema, \
     graphql_sync, ObjectType
 from ariadne.constants import PLAYGROUND_HTML
 from flask import request, jsonify
-from components.get_related_content_resolver import getRelatedContent_resolver
+from components.get_syndicated_related_content_resolver import getSyndicatedRelatedContent_resolver
 
 query = ObjectType("Query")
-query.set_field("getRelatedContentFor", getRelatedContent_resolver)
+query.set_field("getSyndicatedRelatedContentFor", getSyndicatedRelatedContent_resolver)
 
 type_defs = load_schema_from_path("schema.graphql")
 schema = make_executable_schema(
