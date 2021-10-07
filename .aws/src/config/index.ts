@@ -25,7 +25,7 @@ export const config = {
   domain,
   codePipeline: {
     githubConnectionArn,
-    repository: 'pocket/backend-typescript-template', //TODO: Change to your github repository before first deployment
+    repository: 'pocket/related-content-api', //TODO: Change to your github repository before first deployment
     branch,
   },
   graphqlVariant,
