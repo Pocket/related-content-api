@@ -216,6 +216,10 @@ class RelatedContentAPI extends TerraformStack {
               name: 'SENTRY_DSN',
               valueFrom: `arn:aws:ssm:${region.name}:${caller.accountId}:parameter/${config.name}/${config.environment}/SENTRY_DSN`,
             },
+            {
+              name: 'PINECONE_API_KEY',
+              valueFrom: `arn:aws:ssm:${region.name}:${caller.accountId}:parameter/${config.name}/${config.environment}/PINECONE_API_KEY`,
+            },
           ],
         },
         {
