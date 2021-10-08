@@ -55,14 +55,14 @@ jobs:
             echo 'export PATH=$HOME/.rover/bin:$PATH' >> $BASH_ENV
       - run:
           name: check service
-          command: rover subgraph check pocket-client-api@current --schema ./schema.graphql --name=recommendation-api
+          command: rover subgraph check pocket-client-api@current --schema ./schema.graphql --name=related-content-api
       - when:
           condition:
             equal: [main, << pipeline.git.branch >>]
           steps:
             - run:
                 name: push service
-                command: rover subgraph publish pocket-client-api@current --schema ./schema.graphql --routing-url https://recommendation-api.readitlater.com/ --name=recommendation-api
+                command: rover subgraph publish pocket-client-api@current --schema ./schema.graphql --routing-url https://related-content-api.readitlater.com/ --name=related-content-api
 
   build:
     #Sets up the code for the docker image to build in
@@ -142,139 +142,16 @@ jobs:
       - store_test_results:
           path: test-reports
 
-  test_lambda:
-    parameters:
-      pipenv_path:
-        default: "aws_lambda/"
-        type: string
-    docker:
-      - image: python:3.8
-        auth:
-          username: $DOCKERHUB_USERNAME
-          password: $DOCKERHUB_PASSWORD
-    environment:
-      WORKON_HOME: '~/.venv'
-    steps:
-      - checkout
-      - restore_cache:
-          key: deps-test-{{ checksum "<<parameters.pipenv_path>>Pipfile.lock" }}
-      - run:
-          name: Build environment and install requirements
-          command: |
-            cd <<parameters.pipenv_path>>
-            pip install pipenv
-            pipenv install --dev
-      - save_cache:
-          key: deps-test-{{ checksum "<<parameters.pipenv_path>>Pipfile.lock" }}
-          paths:
-            - "~/.venv"
-      - run:
-          name: Run tests
-          command: |
-            mkdir test-reports
-            cd <<parameters.pipenv_path>>
-            pipenv run pytest tests/ --junitxml=test-reports/junit.xml
-      - store_test_results:
-          path: test-reports
-
-  lambda:
-    description: Builds and Optionaly deploys all the associated lambdas
-    parameters:
-      env_lower_name:
-        type: string
-        description: The lower case env name
-      env_capital_name:
-        default: Env Name
-        description: The env capital name
-        type: string
-      deploy:
-        type: boolean
-        default: true
-    docker:
-      - image: python:3.8
-        auth:
-          username: $DOCKERHUB_USERNAME
-          password: $DOCKERHUB_PASSWORD
-    steps:
-      - checkout
-      - when:
-          condition: << parameters.deploy >>
-          steps:
-            - aws-cli/setup:
-                aws-access-key-id: << parameters.env_capital_name >>_AWS_ACCESS_KEY
-                aws-secret-access-key: << parameters.env_capital_name >>_AWS_SECRET_ACCESS_KEY
-                aws-region: << parameters.env_capital_name >>_AWS_DEFAULT_REGION
-            - run:
-                name: Package Lambda
-                # We bundle our code in a way that lambda can understand and execute
-                # - pipenv lock -r > requirements.txt - output a requirements.txt file from Pipfile
-                # - pip install -r requirements.txt --no-deps -t package | installs the requirements into a "package" directory
-                # - change dir into the "package" dir and add all the packages to a zip file as /tmp
-                # - change dir into the "aws_lambda" dir and remove all files and folder we want to exclude from the build
-                # - change dir into the root of the application and add the "aws_lambda" dir to the zip file excluding the Pipfile and Pipfile.lock
-                # - copy the zip file to /tmp/build.zip and store as a CI artifact for quick inspection of the build
-                command: |
-                  apt-get update && apt-get install zip
-                  pip install pipenv
-                  cd aws_lambda
-                  pipenv lock -r > requirements.txt
-                  pip install -r requirements.txt --no-deps -t package
-                  cd package
-                  mkdir -p /tmp
-                  zip -r9 "/tmp/$CIRCLE_SHA1.zip" . -x \*__pycache__\* \.git\*
-                  cd .. && rm -rf package __pycache__ requirements.txt && cd ..
-                  zip -gr "/tmp/$CIRCLE_SHA1.zip" aws_lambda -x aws_lambda/Pipfile*
-                  cp "/tmp/$CIRCLE_SHA1.zip" /tmp/build.zip
-            - run:
-                name: Upload Package
-                command: aws s3 cp "/tmp/$CIRCLE_SHA1.zip" s3://pocket-recommendationapi-<< parameters.env_lower_name >>-sqs-translation/
-            - pocket/deploy_lambda:
-                s3-bucket: pocket-recommendationapi-<< parameters.env_lower_name >>-sqs-translation
-                aws-access-key-id: << parameters.env_capital_name >>_AWS_ACCESS_KEY
-                aws-secret-access-key: << parameters.env_capital_name >>_AWS_SECRET_ACCESS_KEY
-                aws-region: << parameters.env_capital_name >>_AWS_DEFAULT_REGION
-                codedeploy-application-name: RecommendationAPI-<< parameters.env_capital_name >>-Sqs-Translation-Lambda
-                codedeploy-deployment-group-name: RecommendationAPI-<< parameters.env_capital_name >>-Sqs-Translation-Lambda
-                function-name: RecommendationAPI-<< parameters.env_capital_name >>-Sqs-Translation-Function
-
-      - store_artifacts:
-          path: /tmp/build.zip
-
 workflows:
   all:
     jobs:
       - test_app:
           <<: *not_main
           context: pocket
-      - test_lambda:
-          <<: *not_main
-          context: pocket
-
+      
       - apollo
 
       - build
-
-      # Build & Deploy Development Lambdas
-      - lambda:
-          <<: *only_dev
-          context: pocket
-          name: deploy_lambdas_dev
-          env_lower_name: dev
-          env_capital_name: Dev
-          deploy: true
-          requires:
-            - setup-deploy-params-dev
-
-      # Build & Deploy Production Lambdas
-      - lambda:
-          <<: *only_main
-          context: pocket
-          name: deploy_lambdas_prod
-          env_lower_name: prod
-          env_capital_name: Prod
-          deploy: true
-          requires:
-            - setup-deploy-params-prod
 
       # Try building the ECS docker image on each branch
       - pocket/docker_build:
@@ -284,7 +161,7 @@ workflows:
           aws-access-key-id: Dev_AWS_ACCESS_KEY
           aws-secret-access-key: Dev_AWS_SECRET_ACCESS_KEY
           aws-region: Dev_AWS_DEFAULT_REGION
-          repo-name: recommendationapi-dev-app
+          repo-name: relatedcontentapi-dev-app
           ecr-url: 410318598490.dkr.ecr.us-east-1.amazonaws.com
           extra-build-args: --build-arg GIT_SHA=${CIRCLE_SHA1}
           push: false
@@ -299,9 +176,9 @@ workflows:
           aws-access-key-id: Dev_AWS_ACCESS_KEY
           aws-secret-access-key: Dev_AWS_SECRET_ACCESS_KEY
           aws-region: Dev_AWS_DEFAULT_REGION
-          codebuild-project-name: RecommendationAPI-Dev
+          codebuild-project-name: RelatedContentAPI-Dev
           codebuild-project-branch: dev
-          repo-name: recommendationapi-dev-app
+          repo-name: relatedcontentapi-dev-app
           ecr-url: 410318598490.dkr.ecr.us-east-1.amazonaws.com
           extra-build-args: --build-arg GIT_SHA=${CIRCLE_SHA1}
           push: true
@@ -317,8 +194,8 @@ workflows:
           aws-access-key-id: Dev_AWS_ACCESS_KEY
           aws-secret-access-key: Dev_AWS_SECRET_ACCESS_KEY
           aws-region: Dev_AWS_DEFAULT_REGION
-          codepipeline-name: RecommendationAPI-Dev-CodePipeline
-          codebuild-project-name: RecommendationAPI-Dev
+          codepipeline-name: RelatedContentAPI-Dev-CodePipeline
+          codebuild-project-name: RelatedContentAPI-Dev
           codebuild-project-branch: dev
           requires:
             - build_docker_dev
@@ -331,9 +208,9 @@ workflows:
           aws-access-key-id: Prod_AWS_ACCESS_KEY
           aws-secret-access-key: Prod_AWS_SECRET_ACCESS_KEY
           aws-region: Prod_AWS_DEFAULT_REGION
-          codebuild-project-name: RecommendationAPI-Prod
+          codebuild-project-name: RelatedContentAPI-Prod
           codebuild-project-branch: main
-          repo-name: recommendationapi-prod-app
+          repo-name: relatedcontentapi-prod-app
           ecr-url: 996905175585.dkr.ecr.us-east-1.amazonaws.com
           extra-build-args: --build-arg GIT_SHA=${CIRCLE_SHA1}
           push: true
@@ -349,8 +226,8 @@ workflows:
           aws-access-key-id: Prod_AWS_ACCESS_KEY
           aws-secret-access-key: Prod_AWS_SECRET_ACCESS_KEY
           aws-region: Prod_AWS_DEFAULT_REGION
-          codepipeline-name: RecommendationAPI-Prod-CodePipeline
-          codebuild-project-name: RecommendationAPI-Prod
+          codepipeline-name: RelatedContentAPI-Prod-CodePipeline
+          codebuild-project-name: RelatedContentAPI-Prod
           codebuild-project-branch: main
           requires:
             - build_docker_prod
@@ -363,7 +240,7 @@ workflows:
           aws_secret_access_key: Prod_AWS_SECRET_ACCESS_KEY
           context: pocket
           env: Prod
-          service_name: RecommendationAPI
+          service_name: RelatedContentAPI
 
       # Dev
       - pocket/setup_deploy_params:
@@ -373,15 +250,15 @@ workflows:
           aws_secret_access_key: Dev_AWS_SECRET_ACCESS_KEY
           context: pocket
           env: Dev
-          service_name: RecommendationAPI
+          service_name: RelatedContentAPI
 
       # Notify sentry of main deployment
       - pocket/sentry_release_notification:
           <<: *only_main
           name: sentry-release-notification-prod
           context: pocket
-          repository_name: Pocket/recommendation-api
-          sentry_project_name: recommendation-api
+          repository_name: Pocket/related-content-api
+          sentry_project_name: related-content-api
           sentry_env: production
           sentry_org: pocket
           workspace-path: /tmp/workspace
@@ -393,8 +270,8 @@ workflows:
           <<: *only_dev
           name: sentry-release-notification-dev
           context: pocket
-          repository_name: Pocket/recommendation-api
-          sentry_project_name: recommendation-api
+          repository_name: Pocket/related-content-api
+          sentry_project_name: related-content-api
           sentry_env: development
           sentry_org: pocket
           workspace-path: /tmp/workspace
