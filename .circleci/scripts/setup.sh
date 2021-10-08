@@ -8,8 +8,8 @@ while [[ "$1" ]]; do
       --hosts)
           "${dir}"/setup_hosts.sh
           ;;
-      --db)
-          "${dir}"/setup_db.sh
+      --aws)
+          "${dir}"/setup_aws.sh
           ;;
     esac
     shift
