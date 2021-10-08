@@ -55,14 +55,14 @@ jobs:
             echo 'export PATH=$HOME/.rover/bin:$PATH' >> $BASH_ENV
       - run:
           name: check service
-          command: rover subgraph check pocket-client-api@current --schema ./schema.graphql --name=related-content-api
+          command: rover subgraph check pocket-client-api@current --schema ./src/schema.graphql --name=related-content-api
       - when:
           condition:
             equal: [main, << pipeline.git.branch >>]
           steps:
             - run:
                 name: push service
-                command: rover subgraph publish pocket-client-api@current --schema ./schema.graphql --routing-url https://related-content-api.readitlater.com/ --name=related-content-api
+                command: rover subgraph publish pocket-client-api@current --schema ./src/schema.graphql --routing-url https://related-content-api.readitlater.com/ --name=related-content-api
 
   build:
     #Sets up the code for the docker image to build in
@@ -94,53 +94,19 @@ jobs:
         auth:
           username: $DOCKERHUB_USERNAME
           password: $DOCKERHUB_PASSWORD
-      - image: library/memcached:1.6
-        auth:
-          username: $DOCKERHUB_USERNAME
-          password: $DOCKERHUB_PASSWORD
-        name: memcached
-      - image: localstack/localstack:0.12.1
-        auth:
-          username: $DOCKERHUB_USERNAME
-          password: $DOCKERHUB_PASSWORD
-        environment:
-          DEBUG: 1
-          SERVICES: 'dynamodb'
-          DATA_DIR: /tmp/localstack/data
-          EXTRA_CORS_ALLOWED_HEADERS: Content-Disposition, Content-Type, x-amz-acl
-          EXTRA_CORS_EXPOSE_HEADERS: ETag
-          HOSTNAME_EXTERNAL: localstack
-          PORT_WEB_UI: 8080
-    parameters:
-      pipenv_path:
-        default: "./"
-        type: string
     environment:
       WORKON_HOME: '~/.venv'
     steps:
       - checkout
-      - restore_cache:
-          key: deps-test-{{ checksum "<<parameters.pipenv_path>>Pipfile.lock" }}
       - run:
           name: Build environment and install requirements
           command: |
-            pip install pipenv
-            pipenv install --dev
-      - save_cache:
-          key: deps-test-{{ checksum "<<parameters.pipenv_path>>Pipfile.lock" }}
-          paths:
-            - "~/.venv"
-      - run:
-          name: run setup.sh
-          command: export $(egrep -v '^#' .docker/local.env | xargs -0) && ./.circleci/scripts/setup.sh --hosts --aws
+            pip install -r requirements.txt
       - run:
           name: Run tests
           command: |
-            mkdir test-reports
-            export $(egrep -v '^#' .docker/local.env | xargs -0)
-            pipenv run pytest tests/ --junitxml=test-reports/junit.xml
-      - store_test_results:
-          path: test-reports
+            cd src
+            pytest
 
 workflows:
   all:
@@ -148,8 +114,9 @@ workflows:
       - test_app:
           <<: *not_main
           context: pocket
-      
-      - apollo
+
+      - apollo:
+          context: pocket
 
       - build
 

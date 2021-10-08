@@ -13,7 +13,7 @@ COPY ./src .
 # Install Dependencies
 COPY requirements.txt .
 RUN echo "GIT_SHA=${GIT_SHA}"
-RUN pip install requirements.txt
+RUN pip install -r requirements.txt
 #WORKDIR /
 #COPY Pipfile .
 #COPY Pipfile.lock .
