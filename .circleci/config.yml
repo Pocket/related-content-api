@@ -62,7 +62,7 @@ jobs:
           steps:
             - run:
                 name: push service
-                command: rover subgraph publish pocket-client-api@current --schema ./src/schema.graphql --routing-url https://related-content-api.readitlater.com/ --name=related-content-api
+                command: rover subgraph publish pocket-client-api@current --schema ./src/schema.graphql --routing-url https://related-content-api.readitlater.com/graphql --name=related-content-api
 
   build:
     #Sets up the code for the docker image to build in

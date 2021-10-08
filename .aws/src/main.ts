@@ -184,8 +184,8 @@ class RelatedContentAPI extends TerraformStack {
       },
       exposedContainer: {
         name: 'app',
-        port: 4001,
-        healthCheckPath: '/.well-known/apollo/server-health',
+        port: 5000,
+        healthCheckPath: '/',
       },
       ecsIamConfig: {
         prefix: config.prefix,
