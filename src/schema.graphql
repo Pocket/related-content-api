@@ -1,13 +1,17 @@
-type RelatedContentItem {
-    title: String
-    url: String!
+scalar Url
+
+type Item @key(fields: "givenUrl") @extends {
+    """
+    The ID of the item that is used by apollo federation to reference the Item entity.
+    """
+    givenUrl: Url! @external
 }
 
 type RelatedContentItemsResult {
     message: String
-    relatedItems: [RelatedContentItem]
+    relatedItems: [Item]
 }
 
 type Query {
-    getSyndicatedRelatedContentFor(syndicated_article_api: String!): RelatedContentItemsResult
+    getSyndicatedRelatedContentFor(url: Url!): RelatedContentItemsResult
 }
