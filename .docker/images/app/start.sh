@@ -46,4 +46,4 @@ set -e
 # Start Gunicorn
 #exec gunicorn -k "$WORKER_CLASS" -c "$GUNICORN_CONF" "$APP_MODULE"
 # TODO: CHANGE THIS BEFORE GOING TO PRODUCTION
-exec cd /app/src && flask run
+cd /app/src && flask run
