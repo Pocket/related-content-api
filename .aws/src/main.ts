@@ -1,10 +1,5 @@
-import { Construct } from 'constructs';
-import {
-  App,
-  DataTerraformRemoteState,
-  RemoteBackend,
-  TerraformStack,
-} from 'cdktf';
+import {Construct} from 'constructs';
+import {App, DataTerraformRemoteState, RemoteBackend, TerraformStack,} from 'cdktf';
 import {
   AwsProvider,
   DataAwsCallerIdentity,
@@ -12,15 +7,9 @@ import {
   DataAwsRegion,
   DataAwsSnsTopic,
 } from '@cdktf/provider-aws';
-import { config } from './config';
-import {
-  ApplicationRedis,
-  PocketALBApplication,
-  PocketECSCodePipeline,
-  PocketPagerDuty,
-  PocketVPC,
-} from '@pocket-tools/terraform-modules';
-import { PagerdutyProvider } from '@cdktf/provider-pagerduty';
+import {config} from './config';
+import {PocketALBApplication, PocketECSCodePipeline, PocketPagerDuty,} from '@pocket-tools/terraform-modules';
+import {PagerdutyProvider} from '@cdktf/provider-pagerduty';
 
 //todo: change class name to your service name
 class RelatedContentAPI extends TerraformStack {
@@ -39,7 +28,6 @@ class RelatedContentAPI extends TerraformStack {
 
     const region = new DataAwsRegion(this, 'region');
     const caller = new DataAwsCallerIdentity(this, 'caller');
-    const cache = RelatedContentAPI.createElasticache(this);
 
     const pocketApp = this.createPocketAlbApplication({
       pagerDuty: this.createPagerDuty(),
@@ -47,46 +35,9 @@ class RelatedContentAPI extends TerraformStack {
       snsTopic: this.getCodeDeploySnsTopic(),
       region,
       caller,
-      cache,
     });
 
     this.createApplicationCodePipeline(pocketApp);
-  }
-
-  /**
-   * Creates the elasticache and returns the node address list
-   * @param scope
-   * @private
-   */
-  private static createElasticache(scope: Construct): {
-    primaryEndpoint: string;
-    readerEndpoint: string;
-  } {
-    const pocketVPC = new PocketVPC(scope, 'pocket-vpc');
-
-    const elasticache = new ApplicationRedis(scope, 'redis', {
-      //Usually we would set the security group ids of the service that needs to hit this.
-      //However we don't have the necessary security group because it gets created in PocketALBApplication
-      //So instead we set it to null and allow anything within the vpc to access it.
-      //This is not ideal..
-      //Ideally we need to be able to add security groups to the ALB application.
-      allowedIngressSecurityGroupIds: undefined,
-      node: {
-        count: config.cacheNodes,
-        size: config.cacheSize,
-      },
-      subnetIds: pocketVPC.privateSubnetIds,
-      tags: config.tags,
-      vpcId: pocketVPC.vpc.id,
-      prefix: config.prefix,
-    });
-
-    return {
-      primaryEndpoint:
-        elasticache.elasticacheReplicationGroup.primaryEndpointAddress,
-      readerEndpoint:
-        elasticache.elasticacheReplicationGroup.readerEndpointAddress,
-    };
   }
 
   /**
@@ -165,7 +116,6 @@ class RelatedContentAPI extends TerraformStack {
     caller: DataAwsCallerIdentity;
     secretsManagerKmsAlias: DataAwsKmsAlias;
     snsTopic: DataAwsSnsTopic;
-    cache: { primaryEndpoint: string; readerEndpoint: string };
   }): PocketALBApplication {
     const {
       pagerDuty,
@@ -173,7 +123,6 @@ class RelatedContentAPI extends TerraformStack {
       caller,
       secretsManagerKmsAlias,
       snsTopic,
-      cache,
     } = dependencies;
 
     return new PocketALBApplication(this, 'application', {
@@ -188,8 +137,8 @@ class RelatedContentAPI extends TerraformStack {
           name: 'app',
           portMappings: [
             {
-              hostPort: 4005,
-              containerPort: 4005,
+              hostPort: 5000,
+              containerPort: 5000,
             },
           ],
           healthCheck: config.healthCheck,
@@ -201,14 +150,6 @@ class RelatedContentAPI extends TerraformStack {
             {
               name: 'ENVIRONMENT',
               value: process.env.NODE_ENV, // this gives us a nice lowercase production and development
-            },
-            {
-              name: 'REDIS_PRIMARY_ENDPOINT',
-              value: cache.primaryEndpoint,
-            },
-            {
-              name: 'REDIS_READER_ENDPOINT',
-              value: cache.readerEndpoint,
             },
           ],
           secretEnvVars: [
