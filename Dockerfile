@@ -1,15 +1,42 @@
-FROM node:16
+FROM python:3.9 as base
 
-WORKDIR /usr/src/app
+# Based on https://sourcery.ai/blog/python-docker/
+FROM base AS python-deps
+ARG GIT_SHA=local
 
-ARG GIT_SHA
+# Install pipenv
+RUN pip install pipenv
 
-COPY . .
+# Install application into container
+RUN mkdir /app
+WORKDIR /app
+COPY ./src .
 
-ENV NODE_ENV=production
-ENV PORT 4242
-ENV GIT_SHA=${GIT_SHA}
+# Install Dependencies
+RUN echo "GIT_SHA=${GIT_SHA}"
 
-EXPOSE ${PORT}
+WORKDIR /
+COPY Pipfile .
+COPY Pipfile.lock .
+ENV PIPENV_VENV_IN_PROJECT=1
+RUN if [ "$GIT_SHA" = "local" ]; then pipenv install --dev; else pipenv install --deploy; fi
 
-CMD ["npm", "start"]
+FROM base AS runtime
+
+# Copy virtual env from python-deps stage
+COPY --from=python-deps /.venv /.venv
+ENV PATH="/.venv/bin:$PATH"
+
+# Create and switch to a new user
+RUN useradd --create-home appuser
+USER appuser
+
+# Flask config
+ENV PORT=5000
+ENV PYTHONPATH=/app
+EXPOSE $PORT
+
+#Sentry GITSHA
+ENV GIT_SHA=$GIT_SHA
+
+CMD ["flask", "run", "--host=0.0.0.0"]
