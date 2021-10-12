@@ -68,7 +68,7 @@ jobs:
     #Sets up the code for the docker image to build in
     #Other repos at Pocket use this to install modules and or compile the code.
     docker:
-      - image: python:3.8
+      - image: python:3.9
     steps:
       - checkout
       # Define the working directory for this job
@@ -90,12 +90,16 @@ jobs:
 
   test_app:
     docker:
-      - image: python:3.8
+      - image: python:3.9
         auth:
           username: $DOCKERHUB_USERNAME
           password: $DOCKERHUB_PASSWORD
     environment:
       WORKON_HOME: '~/.venv'
+    parameters:
+      pipenv_path:
+        default: "./"
+        type: string
     steps:
       - checkout
       - run:
