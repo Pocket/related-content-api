@@ -81,7 +81,6 @@ jobs:
           command: |
             mkdir -p /tmp/workspace/app_prod
             cp -r . /tmp/workspace/app_prod
-            cp Dockerfile /tmp/workspace/app_prod/
       # Persist built files to workspace
       - persist_to_workspace:
           root: /tmp/workspace
