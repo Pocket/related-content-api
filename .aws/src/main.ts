@@ -144,12 +144,8 @@ class RelatedContentAPI extends TerraformStack {
           healthCheck: config.healthCheck,
           envVars: [
             {
-              name: 'NODE_ENV',
-              value: process.env.NODE_ENV,
-            },
-            {
-              name: 'ENVIRONMENT',
-              value: process.env.NODE_ENV, // this gives us a nice lowercase production and development
+              name: 'FLASK_APP',
+              value: 'main.py', 
             },
           ],
           secretEnvVars: [
