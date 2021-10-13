@@ -145,7 +145,7 @@ class RelatedContentAPI extends TerraformStack {
           envVars: [
             {
               name: 'FLASK_APP',
-              value: 'main.py', 
+              value: 'main.py',
             },
           ],
           secretEnvVars: [
