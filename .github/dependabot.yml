@@ -3,16 +3,15 @@
 
 version: 2
 updates:
-  # Enable version updates for npm
-  - package-ecosystem: 'npm'
-    # Look for `package.json` and `lock` files in the `root` directory
+  # Maintain dependencies for pip
+  - package-ecosystem: 'pip'
     directory: '/'
     schedule:
       interval: 'daily'
       time: '09:00'
       timezone: 'America/Los_Angeles'
     commit-message:
-      prefix: '[DEPBOT-0101]'
+      prefix: '[DEPBOT-0105]'
 
   # Enable version updates for Docker
   - package-ecosystem: 'docker'
@@ -23,7 +22,7 @@ updates:
       time: '09:00'
       timezone: 'America/Los_Angeles'
     commit-message:
-      prefix: '[DEPBOT-0102]'
+      prefix: '[DEPBOT-0105]'
 
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: 'github-actions'
@@ -33,7 +32,7 @@ updates:
       time: '09:00'
       timezone: 'America/Los_Angeles'
     commit-message:
-      prefix: '[DEPBOT-0103]'
+      prefix: '[DEPBOT-0105]'
 
   # Maintain dependencies for Terraform
   - package-ecosystem: 'npm'
@@ -43,4 +42,4 @@ updates:
       time: '09:00'
       timezone: 'America/Los_Angeles'
     commit-message:
-      prefix: '[DEPBOT-0104]'
+      prefix: '[DEPBOT-0105]'

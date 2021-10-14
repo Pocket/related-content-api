@@ -1,5 +1,5 @@
-const name = 'Acme'; //todo: change the service name, match shared infrastructure name
-const domainPrefix = 'acme';
+const name = 'RelatedContentAPI'; //todo: change the service name, match shared infrastructure name
+const domainPrefix = 'related-content-api';
 const isDev = process.env.NODE_ENV === 'development';
 const environment = isDev ? 'Dev' : 'Prod';
 const domain = isDev
@@ -20,12 +20,12 @@ export const config = {
   isDev,
   prefix: `${name}-${environment}`,
   circleCIPrefix: `/${name}/CircleCI/${environment}`,
-  shortName: 'ACME', //change to your service name, limit to 6 characters, match shared-infrastructure short name
+  shortName: 'RCNAPI', //change to your service name, limit to 6 characters, match shared-infrastructure short name
   environment,
   domain,
   codePipeline: {
     githubConnectionArn,
-    repository: 'pocket/backend-typescript-template', //TODO: Change to your github repository before first deployment
+    repository: 'pocket/related-content-api', //TODO: Change to your github repository before first deployment
     branch,
   },
   graphqlVariant,
@@ -34,7 +34,7 @@ export const config = {
   healthCheck: {
     command: [
       'CMD-SHELL',
-      'curl -f http://localhost:4001/.well-known/apollo/server-health || exit 1',
+      'curl -f http://localhost:5000 || exit 1',
     ],
     interval: 15,
     retries: 3,

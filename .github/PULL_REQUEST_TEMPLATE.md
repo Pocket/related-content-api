@@ -4,11 +4,11 @@ What changed? What is the business/product goal?
 - Change 1
 - Change 2
 
-## I'd love feedback/perspectives on:
-- 
-
 ## Implementation Decisions
 - 
+
+## I'd love feedback/perspectives on:
+-
 
 ## Deployment steps
 - [ ] Database migrations?
