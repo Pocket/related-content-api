@@ -1,27 +1,10 @@
-# Backend Starter repository
+# Related Content API
 
-This repository can be used as a template to spin up a new service. 
+This API surfaces a gql endpoint called `getSyndicatedRelatedContent` that takes in a givenUrl and sends back a sequence of objects witrh givenUrls.
 
-Note: please change all reference to `Acme` to your service name. There are `Todo`s in this repository
-that points to name changes to your new service name, please address them before spinning up the service.
+Under the hood, it's finding five recommendations of syndicated content for someone who wanted to read the input piece. 
 
-## Folder structure
-- the infrastructure code is present in `.aws`
-- the application code is in `src`
-- `.docker` contains local setup
-- `.circleci` contains circleCI setup
+# Broader goal 
 
-## Develop Locally
-```bash
-source related-content-api/bin/activate
-pip3 install requirements.txt
-cd src
-flask run
-```
+This API can set patterns for how we handle recommending a sequence of items at Pocket (compared to Recs API, which returns sequences of SEQUENCES of items, and which depends on some things that are currently in recit and would eventually be here). 
 
-## Start docker
-```bash
-# npm ci not required if already up-to-date
-npm ci
-docker compose up
-```
