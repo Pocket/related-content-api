@@ -1,5 +1,5 @@
 import pytest
-from components.vector_database_client import VectorDatabaseClient, PineconeResult
+from components.vector_database_client import VectorDatabaseClient, PineconeResult, MatchResult
 
 def test_result_desearialization():
     pinecone_result_dict = {'results': [
@@ -13,11 +13,11 @@ def test_result_desearialization():
             'namespace': ''}
     ]}
 
-    pinecone_result = PineconeResult.from_dict(pinecone_result_dict)
-    matches = pinecone_result.results.matches
+    matching_vector_result = PineconeResult.from_dict(pinecone_result_dict)
+    assert isinstance(matching_vector_result, MatchResult)
+    matches = matching_vector_result.matches
 
     assert len(matches) == 5
-    first_match = matches[0]
-    assert first_match.id == 'v6979'
-    assert first_match.score == 1.0
-    assert first_match.values == []
+    #We are going to have the vector database respond with the givenUrl as a key.
+    given_urls = [match.givenUrl for match in matches]
+    assert "getpocket.com" in given_urls
