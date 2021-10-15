@@ -1,0 +1,13 @@
+name: pinecone-cli
+channels:
+  - anaconda
+  - conda-forge
+dependencies:
+  - numpy=1.21.2=py39hdbf815f_0
+  - pip=21.2.4=pyhd8ed1ab_0
+  - python=3.9.7=hf930737_3_cpython
+  - scipy=1.7.1=py39hee8e79c_0
+  - sqlite=3.36.0=h9cd32fc_2
+  - pip:
+    - joblib==1.0.1
+    - pinecone-client==2.0.0
