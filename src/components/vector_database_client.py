@@ -11,10 +11,19 @@ class Match:
 class MatchResult:
     matches: [Match]
 
+@dataclass
+class VectorResult:
+    pass
+
 class VectorDatabaseClient(ABC):
     @abstractmethod
     def get_similar_vectors(self, key_vector: [float], num_results: int = 5) -> MatchResult:
         ...
+
+    @abstractmethod
+    def get_vector(self, key: str) -> VectorResult:
+        ...
+
 
 @dataclass
 class PineconeResult:
@@ -29,11 +38,20 @@ class PineconeDatabaseClient(VectorDatabaseClient):
         self.api_key = api_key
         self.region = region
 
-    def get_similar_vectors(self, key_vector: [float], num_results: int = 5):
         pinecone.init(api_key=self.api_key, environment=self.region)
-        index = pinecone.Index('pocket-best-of')
+        self.index = pinecone.Index('pocket-best-of')
 
-        result = index.query(
+    def get_vector(self, key: str):
+        result = self.index.query(
+            queries=key,
+            include_values=True
+        )
+        print("RESULT RESULT")
+        print(result)
+        return VectorResult.from_dict(result.to_dict())
+
+    def get_similar_vectors(self, key_vector: [float], num_results: int = 5):
+        result = self.index.query(
             queries=[key_vector],
             top_k=num_results,
             include_values=False

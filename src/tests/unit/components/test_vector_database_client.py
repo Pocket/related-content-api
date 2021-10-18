@@ -1,7 +1,7 @@
 import pytest
 from components.vector_database_client import VectorDatabaseClient, PineconeResult, MatchResult
 
-def test_result_desearialization():
+def test_vector_match_result_desearialization():
     pinecone_result_dict = {'results': [
         {'matches': [
             {'id': 'v6979', 'score': 1.0, 'values': []},
@@ -21,3 +21,6 @@ def test_result_desearialization():
     #We are going to have the vector database respond with the givenUrl as a key.
     given_urls = [match.givenUrl for match in matches]
     assert "getpocket.com" in given_urls
+
+def test_get_vector_result_desearialization():
+    pass
