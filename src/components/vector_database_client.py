@@ -1,37 +1,58 @@
+import hashlib
 import pinecone
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
 
+
 @dataclass
 class Match:
-    givenUrl: str
+    url: str
+    publisher: str
     id: str
 
-@dataclass
-class MatchResult:
-    matches: [Match]
 
 @dataclass
-class VectorResult:
-    pass
-
-class VectorDatabaseClient(ABC):
-    @abstractmethod
-    def get_similar_vectors(self, key_vector: [float], num_results: int = 5) -> MatchResult:
-        ...
-
-    @abstractmethod
-    def get_vector(self, key: str) -> VectorResult:
-        ...
-
-
-@dataclass
-class PineconeResult:
+class PineconeMatchResult:
     @classmethod
     def from_dict(cls, dictionary):
         matches_from_dict = dictionary.get('results')[0].get('matches')
-        matches_as_objects = [Match(id=match.get('id'), givenUrl='getpocket.com') for match in matches_from_dict]
-        return MatchResult(matches=matches_as_objects)
+        matches_as_objects = [
+            Match(
+                id=match.get('id'),
+                url=match.get('metadata').get('url'),
+                publisher=match.get('metadata').get('publisher'),
+            ) for match in matches_from_dict
+        ]
+        return RelatedContentAPIMatchResult(matches=matches_as_objects)
+
+
+@dataclass
+class RelatedContentAPIMatchResult:
+    matches: [Match]
+
+
+@dataclass
+class RelatedContentAPIVectorResult:
+    matching_vector: [float]
+
+
+@dataclass
+class PineconeVectorResult:
+    @classmethod
+    def from_dict(cls, dictionary, for_key):
+        matching_vector = dictionary.get('vectors').get(for_key).get('value')
+        return RelatedContentAPIVectorResult(matching_vector=matching_vector)
+
+
+class VectorDatabaseClient(ABC):
+    @abstractmethod
+    def get_similar_vectors(self, key_vector: [float], num_results: int = 5) -> RelatedContentAPIMatchResult:
+        ...
+
+    @abstractmethod
+    def get_vector(self, key: str) -> RelatedContentAPIVectorResult:
+        ...
+
 
 class PineconeDatabaseClient(VectorDatabaseClient):
     def __init__(self, api_key: str, region: str = 'us-west1-gcp'):
@@ -41,19 +62,20 @@ class PineconeDatabaseClient(VectorDatabaseClient):
         pinecone.init(api_key=self.api_key, environment=self.region)
         self.index = pinecone.Index('pocket-best-of')
 
-    def get_vector(self, key: str):
-        result = self.index.query(
-            queries=key,
-            include_values=True
-        )
-        print("RESULT RESULT")
-        print(result)
-        return VectorResult.from_dict(result.to_dict())
+    def get_vector(self, url: str):
+        # Pinecone ids have a 64 character max, so we use the url's sha-256.
+        hashed_url = hashlib.sha256(url.encode('utf-8')).hexdigest()
+
+        result = self.index.fetch(ids=[hashed_url])
+        return PineconeVectorResult.from_dict(dictionary=result.to_dict(), for_key=hashed_url)
 
     def get_similar_vectors(self, key_vector: [float], num_results: int = 5):
         result = self.index.query(
-            queries=[key_vector],
-            top_k=num_results,
-            include_values=False
+            queries=[key_vector],  # Which article we want similar results to
+            top_k=num_results,  # How many similar articles to send back
+            include_values=False,  # We don't need the actual vectors, and removing them slims the payload.
+            include_metadata=True  # We DO need the unhashed URL and publisher, though, which is in here.
         )
-        return PineconeResult.from_dict(result.to_dict()) #There's gotta be a more efficient way to serialize this
+
+        return PineconeMatchResult.from_dict(
+            result.to_dict())  # There's gotta be a more efficient way to serialize this
