@@ -16,7 +16,7 @@ def test_vector_match_result_desearialization():
 
     matching_vector_result = PineconeMatchResult.from_dict(pinecone_result_dict)
     assert isinstance(matching_vector_result, RelatedContentAPIMatchResult)
-    matches = matching_vector_result.matches
+    matches = matching_vector_result.related_items
 
     assert len(matches) == 5
     # We are going to have the vector database respond with the givenUrl as a key.

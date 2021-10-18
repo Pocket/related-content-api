@@ -23,12 +23,17 @@ class PineconeMatchResult:
                 publisher=match.get('metadata').get('publisher'),
             ) for match in matches_from_dict
         ]
-        return RelatedContentAPIMatchResult(matches=matches_as_objects)
+        return RelatedContentAPIMatchResult(related_items=matches_as_objects)
 
 
 @dataclass
 class RelatedContentAPIMatchResult:
-    matches: [Match]
+    related_items: [Match]
+
+    # Explicit switch from the snake case in Python
+    # to the camel case that gql clients expect
+    def to_dict(self):
+        return {"relatedItems": self.related_items}
 
 
 @dataclass
