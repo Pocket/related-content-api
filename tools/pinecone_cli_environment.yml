@@ -8,6 +8,7 @@ dependencies:
   - python=3.9.7=hf930737_3_cpython
   - scipy=1.7.1=py39hee8e79c_0
   - sqlite=3.36.0=h9cd32fc_2
+  - gensim=3.8.3
   - pip:
     - joblib==1.0.1
     - pinecone-client==2.0.0
