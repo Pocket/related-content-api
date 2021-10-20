@@ -12,10 +12,10 @@ class Match:
 
 
 @dataclass
-class PineconeMatchResult:
+class PineconeMatchPayload:
     @classmethod
-    def from_dict(cls, dictionary):
-        matches_from_dict = dictionary.get('results')[0].get('matches')
+    def to_related_content_result(cls, pinecone_result):
+        matches_from_dict = pinecone_result.results[0].get('matches', [])
         matches_as_objects = [
             Match(
                 id=match.get('id'),
@@ -42,10 +42,10 @@ class RelatedContentAPIVectorResult:
 
 
 @dataclass
-class PineconeVectorResult:
+class PineconeVectorPayload:
     @classmethod
-    def from_dict(cls, dictionary, for_key):
-        matching_vector = dictionary.get('vectors').get(for_key).get('value')
+    def to_related_content_result(cls, payload, for_key):
+        matching_vector = payload.vectors.get(for_key).get('value')
         return RelatedContentAPIVectorResult(matching_vector=matching_vector)
 
 
@@ -72,15 +72,14 @@ class PineconeDatabaseClient(VectorDatabaseClient):
         hashed_url = hashlib.sha256(url.encode('utf-8')).hexdigest()
 
         result = self.index.fetch(ids=[hashed_url])
-        return PineconeVectorResult.from_dict(dictionary=result.to_dict(), for_key=hashed_url)
+        return PineconeVectorPayload.to_related_content_result(result, for_key=hashed_url)
 
     def get_similar_vectors(self, key_vector: [float], num_results: int = 5):
         result = self.index.query(
             queries=[key_vector],  # Which article we want similar results to
-            top_k=num_results,  # How many similar articles to send back
+            top_k=num_results,     # How many similar articles to send back
             include_values=False,  # We don't need the actual vectors, and removing them slims the payload.
             include_metadata=True  # We DO need the unhashed URL and publisher, though, which is in here.
         )
 
-        return PineconeMatchResult.from_dict(
-            result.to_dict())  # There's gotta be a more efficient way to serialize this
+        return PineconeMatchPayload.to_related_content_result(result)
