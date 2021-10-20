@@ -1,15 +1,9 @@
+from components.vector_database_client import PineconeDatabaseClient
 
-def getSyndicatedRelatedContent_resolver(obj, info, url):
-    # 1. get the syndicated article id
-    # 2. Get text from content db using #1
-    # 3. vectorize using doc2vec and #2
-    # 4. Get similar articles from vector db using #3
+def getSyndicatedRelatedContent_resolver(obj, info, url, vector_db_client=PineconeDatabaseClient):
+    vector_db_client_instance = vector_db_client()
 
-    payload = {
-        "message": "Am I working?",
-        "relatedItems": [
-            {"givenUrl": "ofbeer.com"},
-            {"givenUrl": "0beer.com"}
-        ]
-    }
-    return payload
+    vector_to_match = vector_db_client_instance.get_vector(url)
+    result = vector_db_client_instance.get_similar_vectors(vector_to_match)
+
+    return result.to_dict()
