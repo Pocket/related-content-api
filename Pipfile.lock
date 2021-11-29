@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "16e8e2760007662dc7acc0dc98e062f224257f7fb0ebd58f1b45572a1df31e47"
+            "sha256": "7454a7fabfdbd9aa5da94a81bf5241d3c9edaec42de283997641b2a0ad11869a"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -18,11 +18,11 @@
     "default": {
         "ariadne": {
             "hashes": [
-                "sha256:56bc3609a0512920f06e9312f8ea6db3c8e4a7cd77f31fbed388f5dba6d589c0",
-                "sha256:e00abd7eb5869b59a638f1e3a7743445bf387236048cf1b0eb9d7c506dcd37c5"
+                "sha256:427d3cbbf5c54975181d38ee1563dc3523aa5fc6dccf65a32c5ef5f3aabe2646",
+                "sha256:861a3ef9860573518a712e20be64f5644e840b55947942abefbba0eba10ef3a1"
             ],
             "index": "pypi",
-            "version": "==0.13.0"
+            "version": "==0.14.0"
         },
         "attrs": {
             "hashes": [
