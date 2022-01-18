@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "c7feb9d1b30621536e0a2178e860946b58d0f31d3bc7abc2ee19d87193cf226a"
+            "sha256": "ab81190e797a8aea0248e911a1782e7a198c366e2c71255d82d476824ffa35a4"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -282,11 +282,11 @@
         },
         "pinecone-client": {
             "hashes": [
-                "sha256:0e4f7b77ff0ebf6925935ac2456886bd9915e584d6f9de6deca3cd1a96ce3776",
-                "sha256:48cb71fd15cb229dc33fe0fd7f187c4d9747d1aead7df012e7f6f1d7af83c893"
+                "sha256:2fa25533e838ae65e63d48a763075a5ecafa535d760359765bf70192b11d9dd0",
+                "sha256:a1f9486803db566c9764be15742a21c7d57a4db2e15977ab4fca82c400d5d788"
             ],
             "index": "pypi",
-            "version": "==2.0.4"
+            "version": "==2.0.5"
         },
         "pluggy": {
             "hashes": [
