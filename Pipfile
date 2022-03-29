@@ -35,10 +35,10 @@ Jinja2 = "==3.0.3"
 MarkupSafe = "==2.0.1"
 PyYAML = "==5.4.1"
 SQLAlchemy = "==1.4.31"
-Werkzeug = "==2.0.2"
+Werkzeug = "==2.1.0"
 
 [dev-packages]
-pytest = "==6.2.5"
+pytest = "==7.1.1"
 
 [requires]
 python_version = "3.9"
