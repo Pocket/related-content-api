@@ -38,7 +38,7 @@ SQLAlchemy = "==1.4.31"
 Werkzeug = "==2.1.0"
 
 [dev-packages]
-pytest = "==6.2.5"
+pytest = "==7.1.2"
 
 [requires]
 python_version = "3.9"
