@@ -122,9 +122,9 @@ workflows:
       - test_app:
           <<: *not_main
           context: pocket
-
-      - apollo:
-          context: pocket
+# Not deploying this for now
+#       - apollo:
+#           context: pocket
 
       - build
 
