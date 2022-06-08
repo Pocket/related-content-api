@@ -1,4 +1,4 @@
-FROM python:3.9 as base
+FROM python:3.10.5 as base
 
 # Based on https://sourcery.ai/blog/python-docker/
 FROM base AS python-deps
